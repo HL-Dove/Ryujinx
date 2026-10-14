@@ -159,11 +159,13 @@ namespace Ryujinx.Ava.UI.ViewModels
                 {
                     OnPropertyChanged(nameof(AppsObservableList));
                     OnPropertyChanged(nameof(HasApplications));
+                    Dispatcher.UIThread.Post(EnsureHomeSelection);
                 })
                 .OnItemRemoved(_ =>
                 {
                     OnPropertyChanged(nameof(AppsObservableList));
                     OnPropertyChanged(nameof(HasApplications));
+                    Dispatcher.UIThread.Post(EnsureHomeSelection);
                 })
 #pragma warning disable MVVMTK0034 // Event to update is fired below
                 .Bind(out _appsObservableList);
@@ -200,6 +202,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             ApplicationLibrary = applicationLibrary;
             VirtualFileSystem = virtualFileSystem;
             AccountManager = accountManager;
+            RefreshHomeProfiles();
             InputManager = inputManager;
             UserChannelPersistence = userChannelPersistence;
             LibHacHorizonManager = libHacHorizonManager;
@@ -357,6 +360,28 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public bool HasGridSelection => GridSelectedApplication != null;
         public bool HasApplications => Applications?.Count > 0;
+        public Ryujinx.HLE.HOS.Services.Account.Acc.UserProfile[] HomeProfiles { get; private set; } = [];
+        public bool HasHomeProfiles => HomeProfiles.Length > 0;
+
+        private void RefreshHomeProfiles()
+        {
+            HomeProfiles = AccountManager?.GetAllUsers().Take(4).ToArray() ?? [];
+            OnPropertyChanged(nameof(HomeProfiles));
+            OnPropertyChanged(nameof(HasHomeProfiles));
+        }
+
+        private void EnsureHomeSelection()
+        {
+            if (AppsObservableList is { Count: > 0 })
+            {
+                if (GridSelectedApplication is null || !AppsObservableList.Contains(GridSelectedApplication))
+                    GridSelectedApplication = AppsObservableList[0];
+            }
+            else if (GridSelectedApplication is not null)
+            {
+                GridSelectedApplication = null;
+            }
+        }
 
         public ApplicationData SelectedApplication
         {
@@ -794,6 +819,7 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             OnPropertyChanged(nameof(AppsObservableList));
             OnPropertyChanged(nameof(HasApplications));
+            Dispatcher.UIThread.Post(EnsureHomeSelection);
         }
 
         private bool Filter(object arg)
@@ -1452,6 +1478,7 @@ namespace Ryujinx.Ava.UI.ViewModels
         public async Task ManageProfiles()
         {
             await NavigationDialogHost.Show(AccountManager, ContentManager, VirtualFileSystem, LibHacHorizonManager.RyujinxClient);
+            RefreshHomeProfiles();
         }
 
         public void SimulateWakeUpMessage()

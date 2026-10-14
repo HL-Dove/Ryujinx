@@ -7,16 +7,12 @@ using Ryujinx.Ava.UI.ViewModels;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Ava.Utilities.AppLibrary;
 using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace Ryujinx.Ava.UI.Controls
 {
     public partial class ApplicationGridView : UserControl
     {
-        private MainWindowViewModel _viewModel;
-        private int _selectionAnimationVersion;
-        private bool _hadSelection;
+        private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(30) };
 
         public static readonly RoutedEvent<ApplicationOpenedEventArgs> ApplicationOpenedEvent =
             RoutedEvent.Register<ApplicationGridView, ApplicationOpenedEventArgs>(nameof(ApplicationOpened), RoutingStrategies.Bubble);
@@ -30,45 +26,24 @@ namespace Ryujinx.Ava.UI.Controls
         public ApplicationGridView()
         {
             InitializeComponent();
-            DataContextChanged += (_, _) =>
-            {
-                if (_viewModel is not null)
-                    _viewModel.PropertyChanged -= ViewModel_PropertyChanged;
-
-                _viewModel = DataContext as MainWindowViewModel;
-                _hadSelection = _viewModel?.HasGridSelection ?? false;
-
-                if (_viewModel is not null)
-                    _viewModel.PropertyChanged += ViewModel_PropertyChanged;
-            };
+            _clockTimer.Tick += (_, _) => UpdateClock();
+            UpdateClock();
         }
 
-        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
         {
-            if (e.PropertyName == nameof(MainWindowViewModel.HasGridSelection))
-            {
-                bool hasSelection = _viewModel.HasGridSelection;
-
-                if (hasSelection && !_hadSelection)
-                    _ = AnimateSelectionAsync();
-
-                _hadSelection = hasSelection;
-            }
+            base.OnAttachedToVisualTree(e);
+            UpdateClock();
+            _clockTimer.Start();
         }
 
-        private async Task AnimateSelectionAsync()
+        protected override void OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
         {
-            int version = ++_selectionAnimationVersion;
-            SelectionPanel.Opacity = 0.4;
-
-            await Task.Delay(35);
-
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (version == _selectionAnimationVersion)
-                    SelectionPanel.Opacity = 1;
-            });
+            _clockTimer.Stop();
+            base.OnDetachedFromVisualTree(e);
         }
+
+        private void UpdateClock() => HomeClock.Text = DateTime.Now.ToString("HH:mm");
 
         public void GameList_DoubleTapped(object sender, TappedEventArgs args)
         {
@@ -86,6 +61,18 @@ namespace Ryujinx.Ava.UI.Controls
         {
             if (TopLevel.GetTopLevel(this) is MainWindow window)
                 window.OpenSettingsFromHome();
+        }
+
+        private async void OpenProfiles_OnClick(object sender, RoutedEventArgs args)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+                await viewModel.ManageProfiles();
+        }
+
+        private void OpenScreenshots_OnClick(object sender, RoutedEventArgs args)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+                viewModel.OpenScreenshotsFolder();
         }
 
         private void OpenApplication(ApplicationData application) =>

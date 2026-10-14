@@ -450,7 +450,9 @@ namespace Ryujinx.Ava.Utilities.Configuration
                     {
                         cff.GameListViewMode = 1;
                     }
-                })
+                }),
+                // The selected title is now displayed above the cover rail.
+                (69, static cff => cff.ShowNames = false)
             );
     }
 }

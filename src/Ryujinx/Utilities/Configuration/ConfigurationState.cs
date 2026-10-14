@@ -235,7 +235,7 @@ namespace Ryujinx.Ava.Utilities.Configuration
             UI.LanguageCode.Value = "en_US";
             UI.BaseStyle.Value = "Dark";
             UI.GameListViewMode.Value = 1;
-            UI.ShowNames.Value = true;
+            UI.ShowNames.Value = false;
             UI.GridSize.Value = 2;
             UI.ApplicationSort.Value = 0;
             UI.IsAscendingOrder.Value = true;

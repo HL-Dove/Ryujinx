@@ -24296,6 +24296,36 @@
         "zh_CN": "动态 Rich Presence",
         "zh_TW": ""
       }
+    },
+    {
+      "ID": "HomeNoGames",
+      "Translations": {
+        "ar_SA": "", "de_DE": "", "el_GR": "", "en_US": "No games yet",
+        "es_ES": "", "fr_FR": "", "he_IL": "", "it_IT": "",
+        "ja_JP": "", "ko_KR": "", "no_NO": "", "pl_PL": "",
+        "pt_BR": "", "ru_RU": "", "sv_SE": "", "th_TH": "",
+        "tr_TR": "", "uk_UA": "", "zh_CN": "游戏库中还没有游戏", "zh_TW": "遊戲庫中還沒有遊戲"
+      }
+    },
+    {
+      "ID": "HomeOptions",
+      "Translations": {
+        "ar_SA": "", "de_DE": "", "el_GR": "", "en_US": "Options",
+        "es_ES": "", "fr_FR": "", "he_IL": "", "it_IT": "",
+        "ja_JP": "", "ko_KR": "", "no_NO": "", "pl_PL": "",
+        "pt_BR": "", "ru_RU": "", "sv_SE": "", "th_TH": "",
+        "tr_TR": "", "uk_UA": "", "zh_CN": "选项", "zh_TW": "選項"
+      }
+    },
+    {
+      "ID": "HomeStartGame",
+      "Translations": {
+        "ar_SA": "", "de_DE": "", "el_GR": "", "en_US": "Start",
+        "es_ES": "", "fr_FR": "", "he_IL": "", "it_IT": "",
+        "ja_JP": "", "ko_KR": "", "no_NO": "", "pl_PL": "",
+        "pt_BR": "", "ru_RU": "", "sv_SE": "", "th_TH": "",
+        "tr_TR": "", "uk_UA": "", "zh_CN": "开始", "zh_TW": "開始"
+      }
     }
   ]
 }
