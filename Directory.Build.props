@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>13.0</LangVersion>
   </PropertyGroup>
 </Project>
