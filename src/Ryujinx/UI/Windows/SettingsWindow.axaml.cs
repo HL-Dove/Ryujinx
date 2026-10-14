@@ -61,6 +61,9 @@ namespace Ryujinx.Ava.UI.Windows
                         UiPage.ViewModel = ViewModel;
                         NavPanel.Content = UiPage;
                         break;
+                    case "CommandsPage":
+                        NavPanel.Content = CommandsPage;
+                        break;
                     case "InputPage":
                         NavPanel.Content = InputPage;
                         break;

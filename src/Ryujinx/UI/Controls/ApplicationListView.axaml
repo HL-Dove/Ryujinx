@@ -13,7 +13,7 @@
     mc:Ignorable="d"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     x:DataType="viewModels:MainWindowViewModel">
-    <Grid>
+    <Grid Background="{DynamicResource HomeBackgroundColor}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -23,6 +23,7 @@
             Padding="8"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
+            Background="Transparent"
             SelectedItem="{Binding ListSelectedApplication}"
             ContextFlyout="{Binding ListAppContextMenu}"
             DoubleTapped="GameList_DoubleTapped"
@@ -37,8 +38,29 @@
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
             <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                    <Setter Property="Margin" Value="5,4" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Background" Value="{DynamicResource HomeSurfaceColor}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource HomeBorderColor}" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="CornerRadius" Value="10" />
+                    <Setter Property="Transitions">
+                        <Transitions>
+                            <BrushTransition Property="Background" Duration="0:0:0.18" />
+                            <BrushTransition Property="BorderBrush" Duration="0:0:0.18" />
+                        </Transitions>
+                    </Setter>
+                </Style>
+                <Style Selector="ListBoxItem:pointerover">
+                    <Setter Property="Background" Value="{DynamicResource HomeRaisedSurfaceColor}" />
+                </Style>
+                <Style Selector="ListBoxItem:selected">
+                    <Setter Property="Background" Value="{DynamicResource HomeAccentWashColor}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource HomeSelectionColor}" />
+                </Style>
                 <Style Selector="ListBoxItem:selected /template/ Rectangle#SelectionIndicator">
-                    <Setter Property="MinHeight" Value="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).ListItemSelectorSize}" />
+                    <Setter Property="Opacity" Value="0" />
                 </Style>
             </ListBox.Styles>
             <ListBox.ItemTemplate>

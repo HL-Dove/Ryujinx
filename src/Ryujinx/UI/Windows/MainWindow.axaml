@@ -7,8 +7,10 @@
     xmlns:window="clr-namespace:Ryujinx.Ava.UI.Windows"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
+    xmlns:ext="clr-namespace:Ryujinx.Ava.Common.Markup"
     xmlns:controls="clr-namespace:Ryujinx.Ava.UI.Controls"
     xmlns:main="clr-namespace:Ryujinx.Ava.UI.Views.Main"
+    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     Cursor="{Binding Cursor}"
     Title="{Binding Title}"
     WindowState="{Binding WindowState}"
@@ -46,18 +48,33 @@
         <Grid
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" ColumnDefinitions="*" RowDefinitions="Auto,*,Auto">
-            <StackPanel
+            <Grid
                 Name="MenuBar"
                 MinHeight="35"
                 Grid.Row="0"
                 Margin="0"
+                Background="{DynamicResource HomeBackgroundColor}"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                IsVisible="{Binding ShowMenuAndStatusBar}"
-                Orientation="Vertical">
-                <main:MainMenuBarView
-                    Name="MenuBarView" />
-            </StackPanel>
+                VerticalAlignment="Stretch">
+                <TextBlock
+                    Margin="22,0"
+                    VerticalAlignment="Center"
+                    FontSize="17"
+                    FontWeight="Bold"
+                    IsVisible="{Binding !IsGameRunning}"
+                    Text="Ryujinx" />
+                <Button
+                    Width="32"
+                    Height="32"
+                    MinWidth="32"
+                    Margin="8,1"
+                    CornerRadius="16"
+                    IsVisible="{Binding IsGameRunning}"
+                    Click="OpenSettings_OnClick"
+                    ToolTip.Tip="{ext:Locale MenuBarOptionsSettings}">
+                    <ui:SymbolIcon Symbol="Settings" FontSize="18" />
+                </Button>
+            </Grid>
             <ContentControl
                 Name="MainContent"
                 Grid.Row="1"
@@ -72,7 +89,8 @@
                       RowDefinitions="Auto,*">
                     <main:MainViewControls
                         Name="ViewControls"
-                        Grid.Row="0"/>
+                        Grid.Row="0"
+                        IsVisible="False" />
                     <controls:ApplicationListView
                         x:Name="ApplicationList"
                         Grid.Row="1"
@@ -175,7 +193,8 @@
             </Grid>
             <main:MainStatusBarView
                 Name="StatusBarView"
-                Grid.Row="2" />
+                Grid.Row="2"
+                IsVisible="False" />
         </Grid>
     </Grid>
 </window:StyleableAppWindow>

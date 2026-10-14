@@ -15,8 +15,9 @@
         <viewModels:MainWindowViewModel />
     </Design.DataContext>
     <DockPanel
-        Margin="0,0,0,5"
-        Height="35"
+        Margin="0"
+        Height="44"
+        Background="{DynamicResource HomeBackgroundColor}"
         HorizontalAlignment="Stretch">
         <Button
             Width="40"
@@ -52,7 +53,7 @@
             Text="{ext:Locale IconSize}"
             ToolTip.Tip="{ext:Locale IconSizeTooltip}" />
         <controls:SliderScroll
-            Width="150"
+            Width="110"
             Height="35"
             Margin="5,-10,5,0"
             VerticalAlignment="Center"
@@ -72,7 +73,7 @@
         </CheckBox>
         <TextBox
             Name="SearchBox"
-            MinWidth="200"
+            MinWidth="160"
             Margin="5,0,5,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
@@ -81,7 +82,7 @@
             Text="{Binding SearchText}"
             Watermark="{ext:Locale MenuSearch}" />
         <DropDownButton
-            Width="150"
+            Width="130"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
             Content="{Binding SortName}"

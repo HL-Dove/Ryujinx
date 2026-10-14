@@ -441,7 +441,16 @@ namespace Ryujinx.Ava.Utilities.Configuration
                 (64, static cff => cff.LoggingEnableAvalonia = false),
                 (65, static cff => cff.UpdateCheckerType = cff.CheckUpdatesOnStart ? UpdaterType.PromptAtStartup : UpdaterType.Off),
                 (66, static cff => cff.DisableInputWhenOutOfFocus = false),
-                (67, static cff => cff.FocusLostActionType = cff.DisableInputWhenOutOfFocus ? FocusLostType.BlockInput : FocusLostType.DoNothing)
+                (67, static cff => cff.FocusLostActionType = cff.DisableInputWhenOutOfFocus ? FocusLostType.BlockInput : FocusLostType.DoNothing),
+                // Show the new home layout on first launch after the UI update.
+                // Users can still switch back to the list and keep that choice.
+                (68, static cff =>
+                {
+                    if (cff.GameListViewMode == 0)
+                    {
+                        cff.GameListViewMode = 1;
+                    }
+                })
             );
     }
 }

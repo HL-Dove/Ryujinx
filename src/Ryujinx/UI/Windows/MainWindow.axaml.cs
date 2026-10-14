@@ -94,7 +94,7 @@ namespace Ryujinx.Ava.UI.Windows
             TitleBar.TitleBarHitTestType = (ConfigurationState.Instance.ShowTitleBar) ? TitleBarHitTestType.Simple : TitleBarHitTestType.Complex;
 
             // NOTE: Height of MenuBar and StatusBar is not usable here, since it would still be 0 at this point.
-            StatusBarHeight = StatusBarView.StatusBar.MinHeight;
+            StatusBarHeight = 0;
             MenuBarHeight = MenuBar.MinHeight;
             
             TitleBar.Height = MenuBarHeight;
@@ -175,12 +175,12 @@ namespace Ryujinx.Ava.UI.Windows
 
                 if (e.NumAppsFound == 0)
                 {
-                    StatusBarView.LoadProgressBar.IsVisible = false;
+                    ViewModel.StatusBarVisible = false;
                 }
 
                 if (e.NumAppsLoaded == e.NumAppsFound)
                 {
-                    StatusBarView.LoadProgressBar.IsVisible = false;
+                    ViewModel.StatusBarVisible = false;
                 }
             });
         }
@@ -435,7 +435,6 @@ namespace Ryujinx.Ava.UI.Windows
 
         private void Load()
         {
-            StatusBarView.VolumeStatus.Click += VolumeStatus_CheckedChanged;
 
             ApplicationGrid.DataContext = ApplicationList.DataContext = ViewModel;
             
@@ -566,6 +565,25 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
+        public void OpenSettingsFromHome()
+        {
+            if (SettingsWindow is not null)
+            {
+                SettingsWindow.Activate();
+                return;
+            }
+
+            SettingsWindow = new SettingsWindow(VirtualFileSystem, ContentManager);
+            SettingsWindow.Closed += (_, _) =>
+            {
+                SettingsWindow = null;
+                ViewModel.LoadConfigurableHotKeys();
+            };
+            SettingsWindow.Show(this);
+        }
+
+        private void OpenSettings_OnClick(object sender, RoutedEventArgs e) => OpenSettingsFromHome();
+
         public static void UpdateGraphicsConfig()
         {
 #pragma warning disable IDE0055 // Disable formatting
@@ -578,24 +596,6 @@ namespace Ryujinx.Ava.UI.Windows
             GraphicsConfig.EnableTextureRecompression = ConfigurationState.Instance.Graphics.EnableTextureRecompression;
             GraphicsConfig.EnableMacroHLE             = ConfigurationState.Instance.Graphics.EnableMacroHLE;
 #pragma warning restore IDE0055
-        }
-
-        private void VolumeStatus_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            if (ViewModel.IsGameRunning && sender is ToggleSplitButton volumeSplitButton)
-            {
-                if (!volumeSplitButton.IsChecked)
-                {
-                    ViewModel.AppHost.Device.SetVolume(ViewModel.VolumeBeforeMute);
-                }
-                else
-                {
-                    ViewModel.VolumeBeforeMute = ViewModel.AppHost.Device.GetVolume();
-                    ViewModel.AppHost.Device.SetVolume(0);
-                }
-
-                ViewModel.Volume = ViewModel.AppHost.Device.GetVolume();
-            }
         }
 
         protected override void OnClosing(WindowClosingEventArgs e)
@@ -662,7 +662,7 @@ namespace Ryujinx.Ava.UI.Windows
         {
             _applicationsLoadedOnce = true;
 
-            StatusBarView.LoadProgressBar.IsVisible = true;
+            ViewModel.StatusBarVisible = true;
             ViewModel.StatusBarProgressMaximum = 0;
             ViewModel.StatusBarProgressValue = 0;
 

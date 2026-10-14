@@ -9,6 +9,7 @@
     xmlns:window="clr-namespace:Ryujinx.Ava.UI.Windows"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
     xmlns:settings="clr-namespace:Ryujinx.Ava.UI.Views.Settings"
+    xmlns:main="clr-namespace:Ryujinx.Ava.UI.Views.Main"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
     xmlns:helper="clr-namespace:Ryujinx.Common.Helper;assembly=Ryujinx.Common"
     Width="1100"
@@ -39,6 +40,14 @@
             <settings:SettingsNetworkView Name="NetworkPage" />
             <settings:SettingsLoggingView Name="LoggingPage" />
             <settings:SettingsHacksView Name="HacksPage" />
+            <StackPanel Name="CommandsPage" Margin="16" Spacing="18">
+                <TextBlock Classes="h1" Text="{ext:Locale MenuBarActions}" />
+                <main:MainMenuBarView Name="SettingsMenuBarView" />
+                <Separator Height="1" />
+                <main:MainViewControls Name="SettingsViewControls" />
+                <Separator Height="1" />
+                <main:MainStatusBarView Name="SettingsStatusBarView" />
+            </StackPanel>
         </Grid>
         <ui:NavigationView
             Grid.Row="1"
@@ -56,6 +65,10 @@
                     Content="{ext:Locale SettingsTabGeneral}"
                     Tag="UiPage"
                     IconSource="New" />
+                <ui:NavigationViewItem
+                    Content="{ext:Locale MenuBarActions}"
+                    Tag="CommandsPage"
+                    IconSource="List" />
                 <ui:NavigationViewItem
                     Content="{ext:Locale SettingsTabInput}"
                     Tag="InputPage"

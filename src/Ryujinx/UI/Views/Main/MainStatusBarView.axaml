@@ -20,7 +20,7 @@
         MinHeight="22"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Bottom"
-        Background="{DynamicResource ThemeContentBackgroundColor}"
+        Background="{DynamicResource HomeSurfaceColor}"
         DockPanel.Dock="Bottom"
         IsVisible="{Binding ShowMenuAndStatusBar}"
         ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto">
@@ -199,6 +199,7 @@
                 Content="{Binding VolumeStatusText}"
                 IsChecked="{Binding VolumeMuted}"
                 IsVisible="{Binding !ShowLoadProgress}"
+                Click="VolumeStatus_CheckedChanged"
                 PointerWheelChanged="VolumeStatus_OnPointerWheelChanged"
                 Background="Transparent"
                 BorderThickness="0"

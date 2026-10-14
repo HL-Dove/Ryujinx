@@ -124,6 +124,13 @@ namespace Ryujinx.Ava.UI.Views.Main
                 Window = window;
                 DataContext = ViewModel = window.ViewModel;
             }
+            else if (VisualRoot is SettingsWindow && RyujinxApp.MainWindow is { } mainWindow)
+            {
+                Window = mainWindow;
+                DataContext = ViewModel = mainWindow.ViewModel;
+                OpenSettingsMenuItem.IsVisible = false;
+                RyuLogo.IsVisible = false;
+            }
         }
 
         public async Task OpenSettings()

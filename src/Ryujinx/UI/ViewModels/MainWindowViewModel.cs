@@ -155,8 +155,16 @@ namespace Ryujinx.Ava.UI.ViewModels
             Applications.ToObservableChangeSet()
                 .Filter(Filter)
                 .Sort(GetComparer())
-                .OnItemAdded(_ => OnPropertyChanged(nameof(AppsObservableList)))
-                .OnItemRemoved(_ => OnPropertyChanged(nameof(AppsObservableList)))
+                .OnItemAdded(_ =>
+                {
+                    OnPropertyChanged(nameof(AppsObservableList));
+                    OnPropertyChanged(nameof(HasApplications));
+                })
+                .OnItemRemoved(_ =>
+                {
+                    OnPropertyChanged(nameof(AppsObservableList));
+                    OnPropertyChanged(nameof(HasApplications));
+                })
 #pragma warning disable MVVMTK0034 // Event to update is fired below
                 .Bind(out _appsObservableList);
 #pragma warning restore MVVMTK0034
@@ -334,6 +342,8 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 _gridSelectedApplication = value;
 
+                OnPropertyChanged(nameof(HasGridSelection));
+
 #pragma warning disable MVVMTK0034
                 if (_gridSelectedApplication != null && _gridAppContextMenu == null)
                     GridAppContextMenu = new ApplicationContextMenu();
@@ -344,6 +354,9 @@ namespace Ryujinx.Ava.UI.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public bool HasGridSelection => GridSelectedApplication != null;
+        public bool HasApplications => Applications?.Count > 0;
 
         public ApplicationData SelectedApplication
         {
@@ -780,6 +793,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                 .AsObservableList();
 
             OnPropertyChanged(nameof(AppsObservableList));
+            OnPropertyChanged(nameof(HasApplications));
         }
 
         private bool Filter(object arg)

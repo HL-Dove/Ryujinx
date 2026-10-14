@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using FluentAvalonia.UI.Controls;
 using Ryujinx.Ava.Common.Locale;
 using Ryujinx.Ava.UI.Windows;
 using Ryujinx.Ava.Utilities.Configuration;
@@ -36,6 +37,12 @@ namespace Ryujinx.Ava.UI.Views.Main
                         Window.LoadApplications();
                 });
             }
+            else if (VisualRoot is SettingsWindow && RyujinxApp.MainWindow is { } mainWindow)
+            {
+                Window = mainWindow;
+                DataContext = mainWindow.ViewModel;
+                StatusBar.IsVisible = true;
+            }
         }
 
         private void VSyncMode_PointerReleased(object sender, PointerReleasedEventArgs e)
@@ -56,6 +63,24 @@ namespace Ryujinx.Ava.UI.Views.Main
         }
 
         private void Refresh_OnClick(object sender, RoutedEventArgs e) => Window.LoadApplications();
+
+        private void VolumeStatus_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (Window.ViewModel.IsGameRunning && sender is ToggleSplitButton volumeSplitButton)
+            {
+                if (!volumeSplitButton.IsChecked)
+                {
+                    Window.ViewModel.AppHost.Device.SetVolume(Window.ViewModel.VolumeBeforeMute);
+                }
+                else
+                {
+                    Window.ViewModel.VolumeBeforeMute = Window.ViewModel.AppHost.Device.GetVolume();
+                    Window.ViewModel.AppHost.Device.SetVolume(0);
+                }
+
+                Window.ViewModel.Volume = Window.ViewModel.AppHost.Device.GetVolume();
+            }
+        }
 
         private void VolumeStatus_OnPointerWheelChanged(object sender, PointerWheelEventArgs e)
         {

@@ -26,23 +26,28 @@ namespace Ryujinx.Ava.UI.Views.Main
             {
                 DataContext = ViewModel = window.ViewModel;
             }
+            else if (VisualRoot is SettingsWindow && RyujinxApp.MainWindow is { } mainWindow)
+            {
+                DataContext = ViewModel = mainWindow.ViewModel;
+            }
         }
 
         public void Sort_Checked(object sender, RoutedEventArgs args)
         {
             if (sender is RadioButton { Tag: string sortStrategy })
-                ViewModel.Sort(Enum.Parse<ApplicationSort>(sortStrategy));
+                ViewModel?.Sort(Enum.Parse<ApplicationSort>(sortStrategy));
         }
 
         public void Order_Checked(object sender, RoutedEventArgs args)
         {
             if (sender is RadioButton { Tag: string sortOrder })
-                ViewModel.Sort(sortOrder is not "Descending");
+                ViewModel?.Sort(sortOrder is not "Descending");
         }
 
         private void SearchBox_OnKeyUp(object sender, KeyEventArgs e)
         {
-            ViewModel.SearchText = SearchBox.Text;
+            if (ViewModel is not null)
+                ViewModel.SearchText = SearchBox.Text;
         }
     }
 }
