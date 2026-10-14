@@ -54,6 +54,7 @@
                 Grid.Row="0"
                 Margin="0"
                 Background="{DynamicResource HomeBackgroundColor}"
+                IsVisible="{Binding IsGameRunning}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
                 <TextBlock

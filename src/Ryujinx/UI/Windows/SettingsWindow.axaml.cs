@@ -51,6 +51,19 @@ namespace Ryujinx.Ava.UI.Windows
             NavPanel.SelectedItem = NavPanel.MenuItems.ElementAt(0);
         }
 
+        public void SelectPage(string pageTag)
+        {
+            if (pageTag is null)
+                return;
+
+            NavigationViewItem page = NavPanel.MenuItems
+                .OfType<NavigationViewItem>()
+                .FirstOrDefault(item => item.Tag?.ToString() == pageTag);
+
+            if (page is not null)
+                NavPanel.SelectedItem = page;
+        }
+
         private void NavPanelOnSelectionChanged(object sender, NavigationViewSelectionChangedEventArgs e)
         {
             if (e.SelectedItem is NavigationViewItem navItem && navItem.Tag is not null)

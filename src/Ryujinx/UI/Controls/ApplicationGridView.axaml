@@ -5,150 +5,273 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ext="clr-namespace:Ryujinx.Ava.Common.Markup"
     xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
+    xmlns:icons="https://github.com/projektanker/icons.avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:profiles="clr-namespace:Ryujinx.HLE.HOS.Services.Account.Acc;assembly=Ryujinx.HLE"
-    xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
     xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
-    d:DesignHeight="720"
-    d:DesignWidth="1280"
+    d:DesignHeight="1080"
+    d:DesignWidth="1920"
     Focusable="True"
+    FlowDirection="LeftToRight"
     mc:Ignorable="d"
     x:DataType="viewModels:MainWindowViewModel">
+    <UserControl.Resources>
+        <LinearGradientBrush x:Key="HomeFocusBrush" StartPoint="0%,100%" EndPoint="100%,0%">
+            <GradientStop Offset="0" Color="#1688FF" />
+            <GradientStop Offset="0.52" Color="#9272EF" />
+            <GradientStop Offset="1" Color="#64DFFF" />
+        </LinearGradientBrush>
+    </UserControl.Resources>
     <UserControl.Styles>
-        <Style Selector="Image.homeCover.small"><Setter Property="Width" Value="140" /><Setter Property="Height" Value="140" /></Style>
-        <Style Selector="Image.homeCover.normal"><Setter Property="Width" Value="185" /><Setter Property="Height" Value="185" /></Style>
-        <Style Selector="Image.homeCover.large"><Setter Property="Width" Value="225" /><Setter Property="Height" Value="225" /></Style>
-        <Style Selector="Image.homeCover.huge"><Setter Property="Width" Value="265" /><Setter Property="Height" Value="265" /></Style>
-        <Style Selector="Button.homeQuickAction">
-            <Setter Property="Background" Value="{DynamicResource HomeSurfaceColor}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource HomeBorderColor}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="RenderTransform" Value="scale(1)" />
-            <Setter Property="RenderTransformOrigin" Value="50%,50%" />
-            <Setter Property="Transitions">
-                <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.18" />
-                    <BrushTransition Property="BorderBrush" Duration="0:0:0.18" />
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18"><TransformOperationsTransition.Easing><CubicEaseOut /></TransformOperationsTransition.Easing></TransformOperationsTransition>
-                </Transitions>
-            </Setter>
+        <Style Selector="Button.homeDock">
+            <Setter Property="Width" Value="124" />
+            <Setter Property="Height" Value="124" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="5" />
+            <Setter Property="CornerRadius" Value="62" />
+            <Setter Property="FocusAdorner" Value="{x:Null}" />
         </Style>
-        <Style Selector="Button.homeQuickAction:pointerover">
-            <Setter Property="Background" Value="{DynamicResource HomeRaisedSurfaceColor}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource HomeSelectionColor}" />
-            <Setter Property="RenderTransform" Value="scale(1.07)" />
+        <Style Selector="Button.homeDock:pointerover">
+            <Setter Property="Background" Value="#393939" />
+            <Setter Property="BorderBrush" Value="{StaticResource HomeFocusBrush}" />
         </Style>
-        <Style Selector="Button.homeQuickAction:pressed"><Setter Property="RenderTransform" Value="scale(0.94)" /></Style>
-        <Style Selector="Button.homeFooterAction"><Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="0" /><Setter Property="Padding" Value="8,4" /></Style>
-        <Style Selector="Button.homeFooterAction:pointerover"><Setter Property="Foreground" Value="{DynamicResource HomeSelectionColor}" /></Style>
+        <Style Selector="Button.homeDock:focus">
+            <Setter Property="Background" Value="#393939" />
+            <Setter Property="BorderBrush" Value="{StaticResource HomeFocusBrush}" />
+        </Style>
+        <Style Selector="Button.homeDock.homeSelected">
+            <Setter Property="Background" Value="#393939" />
+            <Setter Property="BorderBrush" Value="{StaticResource HomeFocusBrush}" />
+        </Style>
+        <Style Selector="Button.homeFooterAction">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="#D5D5D8" />
+        </Style>
+        <Style Selector="Button.homeFooterAction:pointerover">
+            <Setter Property="Foreground" Value="#30BEFF" />
+        </Style>
     </UserControl.Styles>
-    <Grid Background="{DynamicResource HomeBackgroundColor}" RowDefinitions="Auto,Auto,*,Auto,Auto">
-        <Grid Grid.Row="0" Margin="58,26,58,38" ColumnDefinitions="*,Auto">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <ItemsControl ItemsSource="{Binding HomeProfiles}">
-                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+    <Grid Background="#1B1B1B">
+        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Canvas Width="1920" Height="1080" Background="#1B1B1B">
+                <ItemsControl Canvas.Left="73" Canvas.Top="69" ItemsSource="{Binding HomeProfiles}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="18" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="profiles:UserProfile">
-                            <Button Width="59" Height="59" MinWidth="59" Padding="3" Background="{DynamicResource HomeSurfaceColor}" BorderBrush="{DynamicResource HomeBorderColor}" BorderThickness="2" CornerRadius="30" Click="OpenProfiles_OnClick" ToolTip.Tip="{ext:Locale MenuBarOptionsManageUserProfiles}">
-                                <Border Width="49" Height="49" ClipToBounds="True" CornerRadius="25">
+                            <Button Width="94" Height="94" MinWidth="94" MinHeight="94" Padding="5"
+                                    Background="#383838" BorderThickness="0" CornerRadius="47"
+                                    Click="OpenProfiles_OnClick"
+                                    ToolTip.Tip="{ext:Locale MenuBarOptionsManageUserProfiles}">
+                                <Border Width="82" Height="82" ClipToBounds="True" CornerRadius="41">
                                     <Image Stretch="UniformToFill" Source="{Binding Image, Converter={x:Static helpers:BitmapArrayValueConverter.Instance}}" />
                                 </Border>
                             </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Button Classes="homeQuickAction" Width="59" Height="59" MinWidth="59" CornerRadius="30" Click="OpenProfiles_OnClick" IsVisible="{Binding !HasHomeProfiles}" ToolTip.Tip="{ext:Locale MenuBarOptionsManageUserProfiles}"><ui:SymbolIcon Symbol="Contact" FontSize="28" /></Button>
-            </StackPanel>
-            <TextBlock Name="HomeClock" Grid.Column="1" VerticalAlignment="Center" FontSize="25" FontWeight="SemiBold" Text="--:--" />
-        </Grid>
+                <Button Canvas.Left="73" Canvas.Top="69" Width="94" Height="94" MinWidth="94" MinHeight="94"
+                        Background="#383838" BorderThickness="0" CornerRadius="47"
+                        IsVisible="{Binding !HasHomeProfiles}" Click="OpenProfiles_OnClick"
+                        ToolTip.Tip="{ext:Locale MenuBarOptionsManageUserProfiles}">
+                    <icons:Icon Value="mdi-account" FontSize="56" Foreground="#D2D2D5" />
+                </Button>
+                <TextBlock Name="HomeClock" Canvas.Left="1489" Canvas.Top="82"
+                           FontSize="43" FontWeight="SemiBold" Foreground="#D2D2D5" Text="--:--" />
+                <icons:Icon Canvas.Left="1633" Canvas.Top="88" Value="mdi-usb"
+                            FontSize="41" Foreground="#D2D2D5" />
+                <TextBlock Canvas.Left="1699" Canvas.Top="82" FontSize="43"
+                           FontWeight="SemiBold" Foreground="#D2D2D5" Text="88%" />
+                <Grid Canvas.Left="1793" Canvas.Top="99" Width="58" Height="31">
+                        <Border Width="52" Height="31" HorizontalAlignment="Left" CornerRadius="5"
+                                BorderBrush="#D2D2D5" BorderThickness="3" />
+                        <Border Width="37" Height="19" Margin="5,0,0,0" HorizontalAlignment="Left"
+                                VerticalAlignment="Center" CornerRadius="2" Background="#D2D2D5" />
+                        <Border Width="5" Height="14" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                CornerRadius="1" Background="#D2D2D5" />
+                </Grid>
 
-        <TextBlock Grid.Row="1" Margin="96,0,60,10" FontSize="27" Foreground="{DynamicResource HomeSelectionColor}" IsVisible="{Binding HasGridSelection}" Text="{Binding GridSelectedApplication.Name}" TextTrimming="CharacterEllipsis" />
-
-        <Grid Grid.Row="2">
-            <ListBox
-                Name="GameListBox"
-                Margin="56,0,0,0"
-                Padding="28,4,60,20"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Top"
-                Background="Transparent"
-                ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                SelectedItem="{Binding GridSelectedApplication}"
-                ContextFlyout="{Binding GridAppContextMenu}"
-                DoubleTapped="GameList_DoubleTapped"
-                ItemsSource="{Binding AppsObservableList}">
-                <ListBox.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="5" /></ItemsPanelTemplate></ListBox.ItemsPanel>
-                <ListBox.Styles>
-                    <Style Selector="ListBoxItem">
-                        <Setter Property="Margin" Value="1" />
-                        <Setter Property="Padding" Value="5" />
-                        <Setter Property="CornerRadius" Value="3" />
-                        <Setter Property="BorderThickness" Value="4" />
-                        <Setter Property="BorderBrush" Value="Transparent" />
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="RenderTransform" Value="scale(1)" />
-                        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
-                        <Setter Property="Transitions">
-                            <Transitions>
-                                <BrushTransition Property="BorderBrush" Duration="0:0:0.16" />
-                                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18"><TransformOperationsTransition.Easing><CubicEaseOut /></TransformOperationsTransition.Easing></TransformOperationsTransition>
-                            </Transitions>
-                        </Setter>
-                    </Style>
-                    <Style Selector="ListBoxItem:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource HomeSelectionColor}" /><Setter Property="RenderTransform" Value="scale(1.015)" /></Style>
-                    <Style Selector="ListBoxItem:selected"><Setter Property="BorderBrush" Value="{DynamicResource HomeSelectionColor}" /></Style>
-                    <Style Selector="ListBoxItem:pressed"><Setter Property="RenderTransform" Value="scale(0.98)" /></Style>
-                    <Style Selector="ListBoxItem:selected /template/ Rectangle#SelectionIndicator"><Setter Property="Opacity" Value="0" /></Style>
-                </ListBox.Styles>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <StackPanel>
-                                <Border ClipToBounds="True" Background="{DynamicResource HomeSurfaceColor}" BoxShadow="0 5 12 0 #33000000">
-                                    <Grid>
-                                        <Image
-                                            Classes.homeCover="True"
-                                            Classes.small="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridSmall}"
-                                            Classes.normal="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridMedium}"
-                                            Classes.large="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridLarge}"
-                                            Classes.huge="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).IsGridHuge}"
-                                            Stretch="UniformToFill"
-                                            Source="{Binding Icon, Converter={x:Static helpers:BitmapArrayValueConverter.Instance}}" />
-                                        <Border Margin="4" Padding="5,2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{DynamicResource HomeSurfaceColor}" CornerRadius="3" IsVisible="{Binding HasIndependentConfiguration}"><TextBlock FontSize="10" Text="{ext:Locale GameSpecificConfigurationHeader}" /></Border>
-                                    </Grid>
-                                </Border>
-                                <TextBlock Margin="2,9,2,0" MaxWidth="265" FontSize="14" IsVisible="{Binding $parent[UserControl].((viewModels:MainWindowViewModel)DataContext).ShowNames}" Text="{Binding Name}" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                            <ui:SymbolIcon Margin="7" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" Foreground="{DynamicResource FavoriteApplicationIconColor}" IsVisible="{Binding Favorite}" Symbol="StarFilled" />
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !HasApplications}" Spacing="18">
-                <ui:SymbolIcon Symbol="Games" FontSize="54" HorizontalAlignment="Center" Foreground="{DynamicResource HomeMutedTextColor}" />
-                <TextBlock HorizontalAlignment="Center" FontSize="21" Text="{ext:Locale HomeNoGames}" />
-                <Button Classes="homeQuickAction" Padding="20,10" HorizontalAlignment="Center" Command="{Binding OpenFile}" Content="{ext:Locale MenuBarFileOpenFromFile}" />
-            </StackPanel>
-        </Grid>
-
-        <StackPanel Grid.Row="3" Margin="0,0,0,38" HorizontalAlignment="Center" Orientation="Horizontal" Spacing="20">
-            <Button Classes="homeQuickAction" Width="78" Height="78" MinWidth="78" CornerRadius="39" Command="{Binding OpenFile}" ToolTip.Tip="{ext:Locale MenuBarFileOpenFromFile}"><ui:SymbolIcon Symbol="Add" FontSize="35" /></Button>
-            <Button Classes="homeQuickAction" Width="78" Height="78" MinWidth="78" CornerRadius="39" Command="{Binding OpenFolder}" ToolTip.Tip="{ext:Locale MenuBarFileOpenUnpacked}"><ui:SymbolIcon Symbol="Folder" FontSize="34" /></Button>
-            <Button Classes="homeQuickAction" Width="78" Height="78" MinWidth="78" CornerRadius="39" Click="OpenProfiles_OnClick" ToolTip.Tip="{ext:Locale MenuBarOptionsManageUserProfiles}"><ui:SymbolIcon Symbol="Contact" FontSize="35" /></Button>
-            <Button Classes="homeQuickAction" Width="78" Height="78" MinWidth="78" CornerRadius="39" Click="OpenScreenshots_OnClick" ToolTip.Tip="{ext:Locale MenuBarFileOpenScreenshotsFolder}"><ui:SymbolIcon Symbol="Pictures" FontSize="35" /></Button>
-            <Button Classes="homeQuickAction" Width="78" Height="78" MinWidth="78" CornerRadius="39" Click="OpenSettings_OnClick" ToolTip.Tip="{ext:Locale MenuBarOptionsSettings}"><ui:SymbolIcon Symbol="Settings" FontSize="35" /></Button>
-        </StackPanel>
-
-        <Grid Grid.Row="4" Margin="30,0,30,12" RowDefinitions="1,Auto">
-            <Border Background="{DynamicResource HomeBorderColor}" />
-            <Grid Grid.Row="1" Margin="20,13,10,0" ColumnDefinitions="*,Auto">
-                <ui:SymbolIcon Symbol="Games" FontSize="29" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource HomeMutedTextColor}" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="25">
-                    <Button Classes="homeFooterAction" Click="OpenSettings_OnClick"><StackPanel Orientation="Horizontal" Spacing="8"><Border Width="25" Height="25" CornerRadius="13" Background="{DynamicResource HomeSurfaceColor}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" Text="+" /></Border><TextBlock VerticalAlignment="Center" FontSize="18" Text="{ext:Locale HomeOptions}" /></StackPanel></Button>
-                    <Button Classes="homeFooterAction" Click="PlaySelected_OnClick" IsVisible="{Binding HasGridSelection}"><StackPanel Orientation="Horizontal" Spacing="8"><Border Width="25" Height="25" CornerRadius="13" Background="{DynamicResource HomeSurfaceColor}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" FontWeight="Bold" Text="A" /></Border><TextBlock VerticalAlignment="Center" FontSize="18" Text="{ext:Locale HomeStartGame}" /></StackPanel></Button>
+                <StackPanel Name="GameTitle" Canvas.Left="31" Canvas.Top="231" Orientation="Horizontal" Spacing="19" IsVisible="False">
+                    <icons:Icon Value="mdi-cellphone" FontSize="43" Foreground="#E60012" />
+                    <TextBlock Width="630" FontSize="30" FontWeight="Bold" Foreground="#27BEF5"
+                               Text="{Binding GridSelectedApplication.Name}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-            </Grid>
-        </Grid>
+                <ListBox Name="GameListBox" Canvas.Left="147" Canvas.Top="289" Width="1773" Height="411"
+                         Padding="0" Background="Transparent" BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                         SelectedItem="{Binding GridSelectedApplication}"
+                         ContextFlyout="{Binding GridAppContextMenu}"
+                         DoubleTapped="GameList_DoubleTapped"
+                         KeyDown="GameList_KeyDown"
+                         GotFocus="GameList_GotFocus" LostFocus="GameList_LostFocus"
+                         ItemsSource="{Binding AppsObservableList}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Width" Value="406" />
+                            <Setter Property="Height" Value="406" />
+                            <Setter Property="MinWidth" Value="0" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="FocusAdorner" Value="{x:Null}" />
+                            <Setter Property="Template">
+                                <ControlTemplate>
+                                    <ContentPresenter Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                </ControlTemplate>
+                            </Setter>
+                        </Style>
+                        <Style Selector="Border.homeSelectionRing">
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                        </Style>
+                        <Style Selector="ListBox.gameFocused ListBoxItem:selected Border.homeSelectionRing">
+                            <Setter Property="BorderBrush" Value="{StaticResource HomeFocusBrush}" />
+                        </Style>
+                        <Style Selector="ListBoxItem:pointerover Border.homeSelectionRing">
+                            <Setter Property="BorderBrush" Value="{StaticResource HomeFocusBrush}" />
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Width="406" Height="406" Background="#1B1B1B">
+                                <Border Width="384" Height="384" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Background="#303030" ClipToBounds="True" CornerRadius="22">
+                                    <Image Width="384" Height="384" Stretch="UniformToFill"
+                                           Source="{Binding Icon, Converter={x:Static helpers:BitmapArrayValueConverter.Instance}}" />
+                                </Border>
+                                <Border Classes="homeSelectionRing" Background="Transparent"
+                                        BorderThickness="5" CornerRadius="35"
+                                        IsHitTestVisible="False" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Canvas.Left="700" Canvas.Top="380" Width="520" Spacing="18"
+                            HorizontalAlignment="Center" IsVisible="{Binding !HasApplications}">
+                    <icons:Icon Value="mdi-gamepad-variant" FontSize="78" Foreground="#BDBDC2" HorizontalAlignment="Center" />
+                    <TextBlock FontSize="30" TextAlignment="Center" Text="{ext:Locale HomeNoGames}" />
+                    <Button Padding="24,13" HorizontalAlignment="Center" Command="{Binding OpenFile}"
+                            Content="{ext:Locale MenuBarFileOpenFromFile}" />
+                </StackPanel>
+
+                <Border Canvas.Left="333" Canvas.Top="770" Width="1254" Height="140"
+                        Background="#303030" CornerRadius="70" />
+                <StackPanel Name="DockBar" Canvas.Left="340" Canvas.Top="778" Orientation="Horizontal"
+                            KeyDown="DockBar_KeyDown">
+                    <Button Name="DockOnline" Classes="homeDock" Tag="Nintendo Switch Online"
+                            Click="FocusGames_OnClick" GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="游戏库">
+                        <Grid Width="96" Height="96">
+                            <Ellipse Fill="#E60012" />
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="1">
+                                <icons:Icon Value="mdi-nintendo-switch" FontSize="38" Foreground="White" HorizontalAlignment="Center" />
+                                <TextBlock FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Text="ONLINE" />
+                            </StackPanel>
+                            <Ellipse Width="15" Height="15" Fill="#20C7F4" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-2,-5,0" />
+                        </Grid>
+                    </Button>
+                    <Button Classes="homeDock" Tag="相册" Click="OpenScreenshots_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale MenuBarFileOpenScreenshotsFolder}">
+                        <icons:Icon Value="mdi-image-outline" FontSize="57" Foreground="#D57027" />
+                    </Button>
+                    <Button Classes="homeDock" Tag="游戏目录" Click="OpenFolder_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale MenuBarFileOpenUnpacked}">
+                        <icons:Icon Value="mdi-newspaper-variant-outline" FontSize="57" Foreground="#27B36B" />
+                    </Button>
+                    <Button Classes="homeDock" Tag="打开游戏" Click="OpenFile_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale MenuBarFileOpenFromFile}">
+                        <icons:Icon Value="mdi-shopping-outline" FontSize="57" Foreground="#E1574B" />
+                    </Button>
+                    <Button Classes="homeDock" Tag="截图" Click="OpenScreenshots_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale MenuBarFileOpenScreenshotsFolder}">
+                        <icons:Icon Value="mdi-image-multiple-outline" FontSize="57" Foreground="#559FEE" />
+                    </Button>
+                    <Button Classes="homeDock" Tag="网络" Click="OpenNetworkSettings_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale MenuBarOptionsSettings}">
+                        <icons:Icon Value="mdi-access-point" FontSize="57" Foreground="#20AFAC" />
+                    </Button>
+                    <Button Classes="homeDock" Tag="手柄" Click="OpenInputSettings_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale SettingsTabInput}">
+                        <Grid Width="37" Height="68" RenderTransform="rotate(45deg)">
+                            <Border CornerRadius="12" BorderBrush="#A9A9B3" BorderThickness="5" />
+                            <Ellipse Width="11" Height="11" Margin="0,12,0,0" HorizontalAlignment="Center"
+                                     VerticalAlignment="Top" Fill="#A9A9B3" />
+                            <Ellipse Width="5" Height="5" Margin="10,39,0,0" HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" Fill="#A9A9B3" />
+                            <Ellipse Width="5" Height="5" Margin="21,39,0,0" HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" Fill="#A9A9B3" />
+                            <Ellipse Width="5" Height="5" Margin="10,50,0,0" HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" Fill="#A9A9B3" />
+                            <Ellipse Width="5" Height="5" Margin="21,50,0,0" HorizontalAlignment="Left"
+                                     VerticalAlignment="Top" Fill="#A9A9B3" />
+                        </Grid>
+                    </Button>
+                    <Button Classes="homeDock" Tag="主机" Click="OpenSystemSettings_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale MenuBarOptionsSettings}">
+                        <icons:Icon Value="mdi-cellphone" FontSize="57" Foreground="#A9A9B3" />
+                    </Button>
+                    <Button Classes="homeDock" Tag="设置" Click="OpenSettings_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus"
+                            ToolTip.Tip="{ext:Locale MenuBarOptionsSettings}">
+                        <icons:Icon Value="mdi-cog-outline" FontSize="57" Foreground="#A9A9B3" />
+                    </Button>
+                    <Button Classes="homeDock" Tag="电源" Click="CloseWindow_OnClick"
+                            GotFocus="DockAction_GotFocus" LostFocus="DockAction_LostFocus" ToolTip.Tip="退出 Ryujinx">
+                        <icons:Icon Value="mdi-power" FontSize="57" Foreground="#A9A9B3" />
+                    </Button>
+                </StackPanel>
+                <TextBlock Name="DockLabel" Canvas.Top="913" Width="550" FontSize="35"
+                           FontWeight="SemiBold" Foreground="#28C4F4" TextAlignment="Center" IsVisible="False" />
+
+                <StackPanel Canvas.Left="102" Canvas.Top="981" Orientation="Horizontal" Spacing="5">
+                    <Border Width="11" Height="12" Background="#64F000" />
+                    <Border Width="11" Height="12" Background="#6E6E6E" />
+                    <Border Width="11" Height="12" Background="#6E6E6E" />
+                    <Border Width="11" Height="12" Background="#6E6E6E" />
+                </StackPanel>
+                <icons:Icon Canvas.Left="96" Canvas.Top="987" Value="mdi-gamepad-variant"
+                            FontSize="72" Foreground="#D9D9DD" />
+                <Grid Canvas.Left="1546" Canvas.Top="997" ColumnDefinitions="160,Auto">
+                    <Button Name="OptionsPrompt" Classes="homeFooterAction" Click="ShowOptions_OnClick" IsVisible="False">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Border Width="35" Height="35" CornerRadius="18" Background="#D2D2D5">
+                                <TextBlock Text="+" FontSize="30" FontWeight="Bold" Foreground="#1B1B1B"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="选项" FontSize="32" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1" Classes="homeFooterAction" Click="Confirm_OnClick">
+                        <StackPanel Orientation="Horizontal" Spacing="11">
+                            <Border Width="35" Height="35" CornerRadius="18" Background="#D2D2D5">
+                                <TextBlock Text="A" FontSize="26" FontWeight="Bold" Foreground="#1B1B1B"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="确定" FontSize="32" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Canvas>
+        </Viewbox>
     </Grid>
 </UserControl>

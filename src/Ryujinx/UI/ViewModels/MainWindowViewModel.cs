@@ -1695,6 +1695,13 @@ namespace Ryujinx.Ava.UI.ViewModels
                 application.Name = AppHost.Device.Processes.ActiveApplication.Name;
             }
 
+            if (WindowState == WindowState.FullScreen && !StartGamesInFullscreen && !startFullscreen)
+            {
+                WindowState = WindowState.Normal;
+                IsFullScreen = false;
+                Window.TitleBar.ExtendsContentIntoTitleBar = !ConfigurationState.Instance.ShowTitleBar;
+            }
+
             SwitchToRenderer(startFullscreen);
 
             _currentApplicationData = application;
@@ -1764,6 +1771,10 @@ namespace Ryujinx.Ava.UI.ViewModels
                 Cursor = Cursor.Default;
 
                 SetMainContent(null);
+
+                WindowState = WindowState.FullScreen;
+                IsFullScreen = true;
+                Window.TitleBar.ExtendsContentIntoTitleBar = true;
 
                 AppHost = null;
 

@@ -83,6 +83,9 @@ namespace Ryujinx.Ava.UI.Windows
                 Window = this
             };
 
+            if (!ViewModel.IsGrid)
+                ViewModel.Glyph = Glyph.Grid;
+
             InitializeComponent();
             Load();
 
@@ -106,6 +109,13 @@ namespace Ryujinx.Ava.UI.Windows
             ApplicationGrid.DataContext = DataContext;
 
             SetWindowSizePosition();
+
+            if (!_deferLoad)
+            {
+                ViewModel.WindowState = WindowState.FullScreen;
+                ViewModel.IsFullScreen = true;
+                TitleBar.ExtendsContentIntoTitleBar = true;
+            }
 
             if (Program.PreviewerDetached)
             {
@@ -480,7 +490,7 @@ namespace Ryujinx.Ava.UI.Windows
             ConfigurationState.Instance.UI.WindowStartup.WindowMaximized.Value = WindowState == WindowState.Maximized;
 
             // Only save rectangle properties if the window is not in a maximized state.
-            if (WindowState != WindowState.Maximized)
+            if (WindowState == WindowState.Normal)
             {
                 // Since scaling is being applied to the loaded settings from disk (see SetWindowSizePosition() above), scaling should be removed from width/height before saving out to disk
                 // as well - otherwise anyone not using a 1.0 scale factor their window will increase in size with every subsequent launch of the program when scaling is applied (Nov. 14, 2024)
@@ -565,15 +575,17 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
-        public void OpenSettingsFromHome()
+        public void OpenSettingsFromHome(string pageTag = null)
         {
             if (SettingsWindow is not null)
             {
+                SettingsWindow.SelectPage(pageTag);
                 SettingsWindow.Activate();
                 return;
             }
 
             SettingsWindow = new SettingsWindow(VirtualFileSystem, ContentManager);
+            SettingsWindow.SelectPage(pageTag);
             SettingsWindow.Closed += (_, _) =>
             {
                 SettingsWindow = null;
