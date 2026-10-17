@@ -12,6 +12,8 @@ namespace Ryujinx.Ava.UI.Models.Input
 
         [ObservableProperty] private Key _showUI;
 
+        [ObservableProperty] private Key _homeMenu = Key.F10;
+
         [ObservableProperty] private Key _pause;
 
         [ObservableProperty] private Key _toggleMute;
@@ -36,6 +38,7 @@ namespace Ryujinx.Ava.UI.Models.Input
             ToggleVSyncMode = config.ToggleVSyncMode;
             Screenshot = config.Screenshot;
             ShowUI = config.ShowUI;
+            HomeMenu = config.HomeMenu;
             Pause = config.Pause;
             ToggleMute = config.ToggleMute;
             ResScaleUp = config.ResScaleUp;
@@ -52,6 +55,7 @@ namespace Ryujinx.Ava.UI.Models.Input
                 ToggleVSyncMode = ToggleVSyncMode,
                 Screenshot = Screenshot,
                 ShowUI = ShowUI,
+                HomeMenu = HomeMenu,
                 Pause = Pause,
                 ToggleMute = ToggleMute,
                 ResScaleUp = ResScaleUp,

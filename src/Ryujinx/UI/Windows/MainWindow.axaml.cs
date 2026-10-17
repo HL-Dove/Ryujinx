@@ -22,6 +22,8 @@ using Ryujinx.Ava.Utilities.AppLibrary;
 using Ryujinx.Ava.Utilities.Configuration;
 using Ryujinx.Ava.Utilities.Configuration.UI;
 using Ryujinx.Common;
+using Ryujinx.Common.Configuration.Hid;
+using Ryujinx.Common.Configuration.Hid.Controller;
 using Ryujinx.Common.Helper;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.UI;
@@ -29,6 +31,7 @@ using Ryujinx.Graphics.Gpu;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS;
 using Ryujinx.HLE.HOS.Services.Account.Acc;
+using Ryujinx.Input;
 using Ryujinx.Input.HLE;
 using Ryujinx.Input.SDL2;
 using System;
@@ -49,6 +52,19 @@ namespace Ryujinx.Ava.UI.Windows
 
         private bool _isLoading;
         private bool _applicationsLoadedOnce;
+        private bool _isOpeningApplication;
+        private LoadingOverlayWindow _loadingOverlayWindow;
+        private HomeOverlayWindow _homeOverlayWindow;
+        private readonly DispatcherTimer _homeButtonTimer = new() { Interval = TimeSpan.FromMilliseconds(40) };
+        private IGamepad _homeButtonGamepad;
+        private string _homeButtonGamepadId;
+        private bool _homeButtonWasDown;
+        private bool _homeButtonPrimed;
+        private long _homeComboStartedAt;
+        private bool _homeComboTriggered;
+        private bool _resumeGameAfterHome;
+        private bool _unblockInputAfterHome;
+        private bool _closingRunningGameFromHome;
 
         private UserChannelPersistence _userChannelPersistence;
         private static bool _deferLoad;
@@ -120,6 +136,9 @@ namespace Ryujinx.Ava.UI.Windows
             if (Program.PreviewerDetached)
             {
                 InputManager = new InputManager(new AvaloniaKeyboardDriver(this), new SDL2GamepadDriver());
+
+                _homeButtonTimer.Tick += PollHomeButton;
+                _homeButtonTimer.Start();
 
                 _ = this.GetObservable(IsActiveProperty).Subscribe(it => ViewModel.IsActive = it);
                 this.ScalingChanged += OnScalingChanged;
@@ -227,16 +246,52 @@ namespace Ryujinx.Ava.UI.Windows
             }
         }
 
-        public void Application_Opened(object sender, ApplicationOpenedEventArgs args)
+        public async void Application_Opened(object sender, ApplicationOpenedEventArgs args)
         {
-            if (args.Application != null)
+            args.Handled = true;
+            if (args.Application is null || _isOpeningApplication)
             {
-                ViewModel.SelectedIcon = args.Application.Icon;
-
-                ViewModel.LoadApplication(args.Application).Wait();
+                return;
             }
 
-            args.Handled = true;
+            _isOpeningApplication = true;
+            try
+            {
+                if (_homeOverlayWindow is not null && ViewModel.AppHost is not null)
+                {
+                    if (args.Application.Id == ViewModel.CurrentApplicationData?.Id)
+                    {
+                        HideHomeOverlay(true);
+                    }
+                    else
+                    {
+                        await ContentDialogHelper.CreateInfoDialog(
+                            LocaleManager.Instance[LocaleKeys.DialogLoadAppGameAlreadyLoadedMessage],
+                            LocaleManager.Instance[LocaleKeys.DialogLoadAppGameAlreadyLoadedSubMessage],
+                            LocaleManager.Instance[LocaleKeys.InputDialogOk],
+                            string.Empty,
+                            LocaleManager.Instance[LocaleKeys.RyujinxInfo]);
+                    }
+
+                    return;
+                }
+
+                ViewModel.SelectedIcon = args.Application.Icon;
+                if (ReferenceEquals(sender, ApplicationGrid) && ViewModel.AppHost is null)
+                {
+                    if (!await ApplicationGrid.PlayLaunchAnimationAsync(args.Application))
+                    {
+                        return;
+                    }
+                }
+
+                await ViewModel.LoadApplication(args.Application);
+            }
+            finally
+            {
+                ApplicationGrid.EndLaunchAnimation();
+                _isOpeningApplication = false;
+            }
         }
 
         internal static void DeferLoadApplication(string launchPathArg, string launchApplicationId, bool startFullscreenArg)
@@ -249,6 +304,7 @@ namespace Ryujinx.Ava.UI.Windows
 
         public void SwitchToGameControl(bool startFullscreen = false)
         {
+            CloseLoadingOverlay();
             ViewModel.ShowLoadProgress = false;
             ViewModel.ShowContent = true;
             ViewModel.IsLoadingIndeterminate = false;
@@ -261,7 +317,8 @@ namespace Ryujinx.Ava.UI.Windows
 
         public void ShowLoading(bool startFullscreen = false)
         {
-            ViewModel.ShowContent = false;
+            // Keep the renderer attached behind the loading overlay so it can create its native window.
+            ViewModel.ShowContent = true;
             ViewModel.ShowLoadProgress = true;
             ViewModel.IsLoadingIndeterminate = true;
 
@@ -269,6 +326,275 @@ namespace Ryujinx.Ava.UI.Windows
             {
                 ViewModel.ToggleFullscreen();
             }
+        }
+
+        public void ShowLoadingOverlay()
+        {
+            if (_loadingOverlayWindow is not null)
+            {
+                return;
+            }
+
+            _loadingOverlayWindow = new LoadingOverlayWindow
+            {
+                DataContext = ViewModel,
+                Position = Position,
+                WindowState = WindowState.FullScreen,
+            };
+
+            _loadingOverlayWindow.Show(this);
+        }
+
+        public void CloseLoadingOverlay()
+        {
+            _loadingOverlayWindow?.Close();
+            _loadingOverlayWindow = null;
+        }
+
+        public bool IsHomeOverlayVisible => _homeOverlayWindow is not null;
+
+        private void ShowHomeOverlay()
+        {
+            if (_homeOverlayWindow is not null || ViewModel.AppHost is null ||
+                !ViewModel.IsGameRunning || ViewModel.ShowLoadProgress)
+            {
+                return;
+            }
+
+            _resumeGameAfterHome = !ViewModel.AppHost.Device.System.IsPaused;
+            _unblockInputAfterHome = !ViewModel.AppHost.NpadManager.InputUpdatesBlocked;
+            if (_resumeGameAfterHome)
+            {
+                ViewModel.AppHost.Pause();
+            }
+
+            if (_unblockInputAfterHome)
+            {
+                ViewModel.AppHost.NpadManager.BlockInputUpdates();
+            }
+
+            HomeOverlayWindow overlay = new(this)
+            {
+                Position = Position,
+                WindowState = WindowState.FullScreen,
+            };
+            _homeOverlayWindow = overlay;
+            overlay.Closed += (_, _) =>
+            {
+                if (ReferenceEquals(_homeOverlayWindow, overlay))
+                {
+                    _homeOverlayWindow = null;
+                    FinishHomeOverlay(true);
+                }
+            };
+
+            overlay.Show(this);
+            ApplicationData running = ViewModel.CurrentApplicationData;
+            ApplicationData selected = ViewModel.AppsObservableList.FirstOrDefault(app => app.Id == running?.Id);
+            overlay.Grid.SetRunningApplication(selected ?? running);
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (ReferenceEquals(_homeOverlayWindow, overlay))
+                {
+                    overlay.Grid.FocusApplication(selected);
+                }
+            }, DispatcherPriority.Loaded);
+        }
+
+        private void HideHomeOverlay(bool resumeGame)
+        {
+            HomeOverlayWindow overlay = _homeOverlayWindow;
+            if (overlay is null)
+            {
+                return;
+            }
+
+            _homeOverlayWindow = null;
+            overlay.Close();
+            FinishHomeOverlay(resumeGame);
+        }
+
+        private void FinishHomeOverlay(bool resumeGame)
+        {
+            if (resumeGame && ViewModel.IsGameRunning && ViewModel.AppHost is not null)
+            {
+                Activate();
+                if (_unblockInputAfterHome)
+                {
+                    ViewModel.AppHost.NpadManager.UnblockInputUpdates();
+                }
+
+                if (_resumeGameAfterHome)
+                {
+                    ViewModel.AppHost.Resume();
+                }
+
+                ViewModel.RendererHostControl?.Focus();
+            }
+
+            _resumeGameAfterHome = false;
+            _unblockInputAfterHome = false;
+        }
+
+        public void CloseHomeOverlayAfterGameExit() => HideHomeOverlay(false);
+
+        public async void CloseRunningGameFromHome()
+        {
+            if (_homeOverlayWindow is null || ViewModel.AppHost is null || _closingRunningGameFromHome)
+            {
+                return;
+            }
+
+            _closingRunningGameFromHome = true;
+            try
+            {
+                await ViewModel.AppHost.ShowExitPrompt();
+            }
+            finally
+            {
+                _closingRunningGameFromHome = false;
+            }
+        }
+
+        private void HomeHotkey_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (TryToggleHomeWithKey(e.Key))
+            {
+                e.Handled = true;
+            }
+        }
+
+        internal bool TryToggleHomeWithKey(Avalonia.Input.Key key)
+        {
+            if (ViewModel.IsClosing || ViewModel.AppHost is null ||
+                !ViewModel.IsGameRunning || ViewModel.ShowLoadProgress ||
+                !AvaloniaKeyboardMappingHelper.TryGetAvaKey(
+                    (Ryujinx.Input.Key)ConfigurationState.Instance.Hid.Hotkeys.Value.HomeMenu,
+                    out Avalonia.Input.Key homeKey) || key != homeKey)
+            {
+                return false;
+            }
+
+            if (_homeOverlayWindow is null)
+            {
+                ShowHomeOverlay();
+            }
+            else
+            {
+                HideHomeOverlay(true);
+            }
+
+            return true;
+        }
+
+        private void PollHomeButton(object sender, EventArgs args)
+        {
+            if (ViewModel.IsClosing || ViewModel.AppHost is null ||
+                !ViewModel.IsGameRunning || ViewModel.ShowLoadProgress || InputManager is null)
+            {
+                ReleaseHomeButtonGamepad();
+                return;
+            }
+
+            if (!IsActive && _homeOverlayWindow?.IsActive != true)
+            {
+                _homeButtonPrimed = false;
+                _homeComboStartedAt = 0;
+                _homeComboTriggered = false;
+                return;
+            }
+
+            ReadOnlySpan<string> ids = InputManager.GamepadDriver.GamepadsIds;
+            string preferredId = null;
+            string handheldId = null;
+            foreach (InputConfig config in ConfigurationState.Instance.Hid.InputConfig.Value)
+            {
+                if (config is StandardControllerInputConfig controller)
+                {
+                    if (controller.PlayerIndex == PlayerIndex.Player1)
+                    {
+                        preferredId = controller.Id;
+                        break;
+                    }
+
+                    if (controller.PlayerIndex == PlayerIndex.Handheld)
+                    {
+                        handheldId = controller.Id;
+                    }
+                }
+            }
+
+            preferredId ??= handheldId;
+            string id = null;
+            foreach (string candidate in ids)
+            {
+                if (candidate == preferredId)
+                {
+                    id = candidate;
+                    break;
+                }
+            }
+
+            if (id is null && ids.Length > 0)
+            {
+                id = ids[0];
+            }
+            if (id != _homeButtonGamepadId ||
+                (id is not null && (_homeButtonGamepad is null || !_homeButtonGamepad.IsConnected)))
+            {
+                ReleaseHomeButtonGamepad();
+                _homeButtonGamepad = id is null ? null : InputManager.GamepadDriver.GetGamepad(id);
+                _homeButtonGamepadId = id;
+            }
+
+            if (_homeButtonGamepad is null)
+            {
+                return;
+            }
+
+            GamepadStateSnapshot state = _homeButtonGamepad.GetStateSnapshot();
+            bool guideDown = state.IsPressed(GamepadButtonInputId.Guide);
+            bool comboDown = state.IsPressed(GamepadButtonInputId.LeftStick) &&
+                state.IsPressed(GamepadButtonInputId.RightStick);
+            if (!comboDown)
+            {
+                _homeComboStartedAt = 0;
+                _homeComboTriggered = false;
+            }
+            else if (_homeComboStartedAt == 0)
+            {
+                _homeComboStartedAt = Environment.TickCount64;
+            }
+
+            bool guidePressed = _homeButtonPrimed && guideDown && !_homeButtonWasDown;
+            bool comboHeld = _homeButtonPrimed && comboDown && !_homeComboTriggered &&
+                Environment.TickCount64 - _homeComboStartedAt >= 800;
+            if (guidePressed || comboHeld)
+            {
+                _homeComboTriggered = comboDown;
+                if (_homeOverlayWindow is null)
+                {
+                    ShowHomeOverlay();
+                }
+                else
+                {
+                    HideHomeOverlay(true);
+                }
+            }
+
+            _homeButtonWasDown = guideDown;
+            _homeButtonPrimed = true;
+        }
+
+        private void ReleaseHomeButtonGamepad()
+        {
+            _homeButtonGamepad?.Dispose();
+            _homeButtonGamepad = null;
+            _homeButtonGamepadId = null;
+            _homeButtonWasDown = false;
+            _homeButtonPrimed = false;
+            _homeComboStartedAt = 0;
+            _homeComboTriggered = false;
         }
 
         private void Initialize()
@@ -650,6 +976,9 @@ namespace Ryujinx.Ava.UI.Windows
             }
 
             ApplicationLibrary.CancelLoading();
+            ApplicationGrid.StopHomeGamepadInput();
+            _homeButtonTimer.Stop();
+            ReleaseHomeButtonGamepad();
             InputManager.Dispose();
             _appLibraryAppsSubscription?.Dispose();
             Program.Exit();

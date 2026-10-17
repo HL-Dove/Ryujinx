@@ -92,6 +92,9 @@ namespace Ryujinx.Ava.UI.Views.Settings
                                     case "ShowUI":
                                         viewModel.KeyboardHotkey.ShowUI = buttonValue.AsHidType<Key>();
                                         break;
+                                    case "HomeMenu":
+                                        viewModel.KeyboardHotkey.HomeMenu = buttonValue.AsHidType<Key>();
+                                        break;
                                     case "Pause":
                                         viewModel.KeyboardHotkey.Pause = buttonValue.AsHidType<Key>();
                                         break;

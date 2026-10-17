@@ -25,7 +25,8 @@
     WindowStartupLocation="Manual"
     Focusable="True"
     GotFocus="InputElement_OnGotFocus"
-    LostFocus="InputElement_OnLostFocus">
+    LostFocus="InputElement_OnLostFocus"
+    KeyUp="HomeHotkey_KeyUp">
     <Window.Styles>
         <Style Selector="TitleBar:fullscreen">
             <Setter Property="Background" Value="#000000" />
@@ -54,7 +55,7 @@
                 Grid.Row="0"
                 Margin="0"
                 Background="{DynamicResource HomeBackgroundColor}"
-                IsVisible="{Binding IsGameRunning}"
+                IsVisible="{Binding ShowGameMenuBar}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
                 <TextBlock

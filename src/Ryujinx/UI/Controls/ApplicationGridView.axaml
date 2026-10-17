@@ -60,7 +60,7 @@
     </UserControl.Styles>
     <Grid Background="#1B1B1B">
         <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Canvas Width="1920" Height="1080" Background="#1B1B1B">
+            <Canvas Name="HomeCanvas" Width="1920" Height="1080" Background="#1B1B1B">
                 <ItemsControl Canvas.Left="73" Canvas.Top="69" ItemsSource="{Binding HomeProfiles}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="18" /></ItemsPanelTemplate>
@@ -84,24 +84,13 @@
                         ToolTip.Tip="{ext:Locale MenuBarOptionsManageUserProfiles}">
                     <icons:Icon Value="mdi-account" FontSize="56" Foreground="#D2D2D5" />
                 </Button>
-                <TextBlock Name="HomeClock" Canvas.Left="1489" Canvas.Top="82"
-                           FontSize="43" FontWeight="SemiBold" Foreground="#D2D2D5" Text="--:--" />
-                <icons:Icon Canvas.Left="1633" Canvas.Top="88" Value="mdi-usb"
-                            FontSize="41" Foreground="#D2D2D5" />
-                <TextBlock Canvas.Left="1699" Canvas.Top="82" FontSize="43"
-                           FontWeight="SemiBold" Foreground="#D2D2D5" Text="88%" />
-                <Grid Canvas.Left="1793" Canvas.Top="99" Width="58" Height="31">
-                        <Border Width="52" Height="31" HorizontalAlignment="Left" CornerRadius="5"
-                                BorderBrush="#D2D2D5" BorderThickness="3" />
-                        <Border Width="37" Height="19" Margin="5,0,0,0" HorizontalAlignment="Left"
-                                VerticalAlignment="Center" CornerRadius="2" Background="#D2D2D5" />
-                        <Border Width="5" Height="14" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                CornerRadius="1" Background="#D2D2D5" />
-                </Grid>
+                <TextBlock Name="HomeClock" Canvas.Right="73" Canvas.Top="82" Width="160"
+                           FontSize="43" FontWeight="SemiBold" Foreground="#D2D2D5"
+                           Text="--:--" TextAlignment="Right" />
 
                 <StackPanel Name="GameTitle" Canvas.Left="31" Canvas.Top="231" Orientation="Horizontal" Spacing="19" IsVisible="False">
-                    <icons:Icon Value="mdi-cellphone" FontSize="43" Foreground="#E60012" />
-                    <TextBlock Width="630" FontSize="30" FontWeight="Bold" Foreground="#27BEF5"
+                    <icons:Icon Width="43" Value="mdi-cellphone" FontSize="43" Foreground="#E60012" />
+                    <TextBlock Name="GameTitleName" Width="630" FontSize="30" FontWeight="Bold" Foreground="#27BEF5"
                                Text="{Binding GridSelectedApplication.Name}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
                 <ListBox Name="GameListBox" Canvas.Left="147" Canvas.Top="289" Width="1773" Height="411"
@@ -111,6 +100,7 @@
                          SelectedItem="{Binding GridSelectedApplication}"
                          ContextFlyout="{Binding GridAppContextMenu}"
                          DoubleTapped="GameList_DoubleTapped"
+                         SelectionChanged="GameList_SelectionChanged"
                          KeyDown="GameList_KeyDown"
                          GotFocus="GameList_GotFocus" LostFocus="GameList_LostFocus"
                          ItemsSource="{Binding AppsObservableList}">
@@ -159,6 +149,25 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <Grid Name="RunningPlayerAvatar" Width="84" Height="84"
+                      IsVisible="False" IsHitTestVisible="False">
+                    <Border CornerRadius="42" Background="#383838" ClipToBounds="True">
+                        <Grid>
+                            <icons:Icon Value="mdi-account" FontSize="43" Foreground="White"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Image Stretch="UniformToFill"
+                                   Source="{Binding HomeProfiles[0].Image, Converter={x:Static helpers:BitmapArrayValueConverter.Instance}}" />
+                        </Grid>
+                    </Border>
+                    <Border CornerRadius="42" Background="Transparent"
+                            BorderBrush="White" BorderThickness="5" />
+                </Grid>
+                <Border Name="RunningGameBadge" Width="255" Height="82" CornerRadius="41"
+                        Background="Black" BorderBrush="White" BorderThickness="4"
+                        IsVisible="False" IsHitTestVisible="False">
+                    <TextBlock Text="正在游玩" FontSize="30" FontWeight="Bold"
+                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
                 <StackPanel Canvas.Left="700" Canvas.Top="380" Width="520" Spacing="18"
                             HorizontalAlignment="Center" IsVisible="{Binding !HasApplications}">
                     <icons:Icon Value="mdi-gamepad-variant" FontSize="78" Foreground="#BDBDC2" HorizontalAlignment="Center" />
@@ -243,34 +252,37 @@
                 <TextBlock Name="DockLabel" Canvas.Top="913" Width="550" FontSize="35"
                            FontWeight="SemiBold" Foreground="#28C4F4" TextAlignment="Center" IsVisible="False" />
 
-                <StackPanel Canvas.Left="102" Canvas.Top="981" Orientation="Horizontal" Spacing="5">
-                    <Border Width="11" Height="12" Background="#64F000" />
-                    <Border Width="11" Height="12" Background="#6E6E6E" />
-                    <Border Width="11" Height="12" Background="#6E6E6E" />
-                    <Border Width="11" Height="12" Background="#6E6E6E" />
-                </StackPanel>
-                <icons:Icon Canvas.Left="96" Canvas.Top="987" Value="mdi-gamepad-variant"
-                            FontSize="72" Foreground="#D9D9DD" />
-                <Grid Canvas.Left="1546" Canvas.Top="997" ColumnDefinitions="160,Auto">
-                    <Button Name="OptionsPrompt" Classes="homeFooterAction" Click="ShowOptions_OnClick" IsVisible="False">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Border Width="35" Height="35" CornerRadius="18" Background="#D2D2D5">
-                                <TextBlock Text="+" FontSize="30" FontWeight="Bold" Foreground="#1B1B1B"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-                            <TextBlock Text="选项" FontSize="32" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <Button Grid.Column="1" Classes="homeFooterAction" Click="Confirm_OnClick">
-                        <StackPanel Orientation="Horizontal" Spacing="11">
-                            <Border Width="35" Height="35" CornerRadius="18" Background="#D2D2D5">
-                                <TextBlock Text="A" FontSize="26" FontWeight="Bold" Foreground="#1B1B1B"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-                            <TextBlock Text="确定" FontSize="32" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
+                <Button Name="OptionsPrompt" Canvas.Right="100" Canvas.Top="997"
+                        Classes="homeFooterAction" Click="ShowOptions_OnClick" IsVisible="False">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Border Width="35" Height="35" CornerRadius="18" Background="#D2D2D5">
+                            <TextBlock Text="+" FontSize="30" FontWeight="Bold" Foreground="#1B1B1B"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Text="选项" FontSize="32" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Name="CloseGamePrompt" Canvas.Right="300" Canvas.Top="997"
+                        Classes="homeFooterAction" Click="CloseRunningGame_OnClick" IsVisible="False">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Border Width="35" Height="35" CornerRadius="18" Background="#D2D2D5">
+                            <TextBlock Text="X" FontSize="25" FontWeight="Bold" Foreground="#1B1B1B"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Text="关闭软件" FontSize="32" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Canvas Name="LaunchAnimationLayer" Canvas.Left="0" Canvas.Top="0"
+                        Width="1920" Height="1080" ClipToBounds="True"
+                        IsVisible="False" IsHitTestVisible="True">
+                    <Border Name="LaunchDim" Width="1920" Height="1080"
+                            Background="#1B1B1B" Opacity="0" />
+                    <Border Name="LaunchGhost" ClipToBounds="True" CornerRadius="28" Opacity="0">
+                        <Image Stretch="UniformToFill"
+                               Source="{Binding SelectedIcon, Converter={x:Static helpers:BitmapArrayValueConverter.Instance}}" />
+                    </Border>
+                </Canvas>
             </Canvas>
         </Viewbox>
     </Grid>

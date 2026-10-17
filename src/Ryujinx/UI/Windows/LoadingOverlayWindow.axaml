@@ -1,0 +1,66 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="clr-namespace:Ryujinx.Ava.UI.Helpers"
+    xmlns:viewModels="clr-namespace:Ryujinx.Ava.UI.ViewModels"
+    x:Class="Ryujinx.Ava.UI.Windows.LoadingOverlayWindow"
+    x:DataType="viewModels:MainWindowViewModel"
+    Background="#1B1B1B"
+    CanResize="False"
+    Focusable="False"
+    ShowActivated="False"
+    ShowInTaskbar="False"
+    SystemDecorations="None"
+    WindowStartupLocation="Manual">
+    <Grid Background="#1B1B1B">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" ColumnDefinitions="Auto,*">
+            <Border
+                Grid.Column="0"
+                Width="256"
+                Height="256"
+                Margin="10"
+                Padding="4"
+                BorderBrush="Black"
+                BorderThickness="2"
+                CornerRadius="3">
+                <Image
+                    Width="256"
+                    Height="256"
+                    Source="{Binding SelectedIcon, Converter={x:Static helpers:BitmapArrayValueConverter.Instance}}" />
+            </Border>
+            <Grid Grid.Column="1" VerticalAlignment="Center" RowDefinitions="Auto,Auto,Auto">
+                <TextBlock
+                    Grid.Row="0"
+                    Margin="10"
+                    FontSize="30"
+                    FontWeight="Bold"
+                    MaxWidth="500"
+                    Text="{Binding LoadHeading}"
+                    TextWrapping="Wrap" />
+                <Border
+                    Grid.Row="1"
+                    Margin="10"
+                    BorderBrush="{Binding ProgressBarBackgroundColor}"
+                    BorderThickness="1"
+                    ClipToBounds="True"
+                    CornerRadius="5">
+                    <ProgressBar
+                        Height="10"
+                        MinWidth="500"
+                        ClipToBounds="True"
+                        CornerRadius="5"
+                        Foreground="{Binding ProgressBarForegroundColor}"
+                        IsIndeterminate="{Binding IsLoadingIndeterminate}"
+                        Maximum="{Binding ProgressMaximum}"
+                        Value="{Binding ProgressValue}" />
+                </Border>
+                <TextBlock
+                    Grid.Row="2"
+                    Margin="10"
+                    FontSize="18"
+                    MaxWidth="500"
+                    Text="{Binding CacheLoadStatus}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

@@ -5,6 +5,7 @@ namespace Ryujinx.Common.Configuration.Hid
         public Key ToggleVSyncMode { get; set; }
         public Key Screenshot { get; set; }
         public Key ShowUI { get; set; }
+        public Key HomeMenu { get; set; } = Key.F10;
         public Key Pause { get; set; }
         public Key ToggleMute { get; set; }
         public Key ResScaleUp { get; set; }

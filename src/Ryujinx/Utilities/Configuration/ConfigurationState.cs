@@ -256,6 +256,7 @@ namespace Ryujinx.Ava.Utilities.Configuration
                 ToggleMute = Key.F2,
                 Screenshot = Key.F8,
                 ShowUI = Key.F4,
+                HomeMenu = Key.F10,
                 Pause = Key.F5,
                 ResScaleUp = Key.Unbound,
                 ResScaleDown = Key.Unbound,

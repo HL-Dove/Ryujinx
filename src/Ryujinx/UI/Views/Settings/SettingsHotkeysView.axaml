@@ -65,6 +65,12 @@
                     </ToggleButton>
                 </StackPanel>
                 <StackPanel>
+                    <TextBlock Text="返回主界面" />
+                    <ToggleButton Name="HomeMenu">
+                        <TextBlock Text="{Binding KeyboardHotkey.HomeMenu, Converter={x:Static helpers:KeyValueConverter.Instance}}" />
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel>
                     <TextBlock Text="{ext:Locale SettingsTabHotkeysPauseHotkey}" />
                     <ToggleButton Name="Pause">
                         <TextBlock Text="{Binding KeyboardHotkey.Pause, Converter={x:Static helpers:KeyValueConverter.Instance}}" />

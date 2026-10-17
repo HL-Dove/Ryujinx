@@ -147,10 +147,12 @@ namespace Ryujinx.Ava.UI.ViewModels
         public MainWindow Window { get; init; }
 
         internal AppHost AppHost { get; set; }
+        public ApplicationData CurrentApplicationData => _currentApplicationData;
 
         public MainWindowViewModel()
         {
             Applications = [];
+            Applications.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasApplications));
 
             Applications.ToObservableChangeSet()
                 .Filter(Filter)
@@ -262,6 +264,13 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         public bool EnableNonGameRunningControls => !IsGameRunning;
 
+        public bool ShowGameMenuBar => IsGameRunning && ShowMenuAndStatusBar;
+
+        partial void OnShowMenuAndStatusBarChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ShowGameMenuBar));
+        }
+
         public bool ShowFirmwareStatus => !ShowLoadProgress;
 
         public bool IsGameRunning
@@ -281,6 +290,7 @@ namespace Ryujinx.Ava.UI.ViewModels
                 OnPropertyChanged(nameof(IsAppletMenuActive));
                 OnPropertyChanged(nameof(StatusBarVisible));
                 OnPropertyChanged(nameof(ShowFirmwareStatus));
+                OnPropertyChanged(nameof(ShowGameMenuBar));
             }
         }
 
@@ -1183,8 +1193,6 @@ namespace Ryujinx.Ava.UI.ViewModels
 
         private void RendererHost_Created(object sender, EventArgs e)
         {
-            ShowLoading(false);
-
             _rendererWaitEvent.Set();
         }
 
@@ -1661,7 +1669,12 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             SelectedIcon ??= ApplicationLibrary.GetApplicationIcon(application.Path, ConfigurationState.Instance.System.Language, application.Id);
 
+            _currentApplicationData = application;
+            LoadHeading = application.Name;
+            CacheLoadStatus = string.Empty;
+            ProgressValue = 0;
             PrepareLoadScreen();
+            ShowLoading(false);
 
             RendererHostControl = new RendererHost();
 
@@ -1681,6 +1694,7 @@ namespace Ryujinx.Ava.UI.ViewModels
             {
                 AppHost.DisposeContext();
                 AppHost = null;
+                SwitchToGameControl(false);
 
                 return;
             }
@@ -1695,16 +1709,18 @@ namespace Ryujinx.Ava.UI.ViewModels
                 application.Name = AppHost.Device.Processes.ActiveApplication.Name;
             }
 
-            if (WindowState == WindowState.FullScreen && !StartGamesInFullscreen && !startFullscreen)
+            WindowState = WindowState.FullScreen;
+            IsFullScreen = true;
+            Window.TitleBar.ExtendsContentIntoTitleBar = true;
+            ShowMenuAndStatusBar = false;
+
+            Window.ShowLoadingOverlay();
+
+            Dispatcher.UIThread.Post(() =>
             {
-                WindowState = WindowState.Normal;
-                IsFullScreen = false;
-                Window.TitleBar.ExtendsContentIntoTitleBar = !ConfigurationState.Instance.ShowTitleBar;
-            }
-
-            SwitchToRenderer(startFullscreen);
-
-            _currentApplicationData = application;
+                SetMainContent(RendererHostControl);
+                RendererHostControl.Focus();
+            });
 
             Thread gameThread = new(InitializeGame) { Name = "GUI.WindowThread" };
             gameThread.Start();
@@ -1763,9 +1779,11 @@ namespace Ryujinx.Ava.UI.ViewModels
 
             Dispatcher.UIThread.InvokeAsync(async () =>
             {
+                Window.CloseHomeOverlayAfterGameExit();
                 ShowMenuAndStatusBar = true;
                 ShowContent = true;
                 ShowLoadProgress = false;
+                Window.CloseLoadingOverlay();
                 IsLoadingIndeterminate = false;
                 CanUpdate = true;
                 Cursor = Cursor.Default;
